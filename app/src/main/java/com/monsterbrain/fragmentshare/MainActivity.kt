@@ -9,7 +9,8 @@ import com.monsterbrain.fragmentshare.fragments.EmailDetailFragment
 import com.monsterbrain.fragmentshare.fragments.EmailListFragment
 import java.util.ArrayList
 
-class MainActivity : AppCompatActivity(), EmailListFragment.ListFragmentListener {
+class MainActivity : AppCompatActivity(), EmailListFragment.ListFragmentListener, EmailDetailFragment.DetailFragmentListener {
+    private lateinit var emailListFragment: EmailListFragment
     private lateinit var emailDetailFragment: EmailDetailFragment
     private lateinit var emailList: ArrayList<EmailData>
 
@@ -17,7 +18,11 @@ class MainActivity : AppCompatActivity(), EmailListFragment.ListFragmentListener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        emailList = DataGenerator.getEmailList()
+        if (savedInstanceState == null) {
+            emailList = DataGenerator.getEmailList()
+        } else {
+            emailList = savedInstanceState.getParcelableArrayList<EmailData>(SAVE_STATE_LIST) as ArrayList<EmailData>
+        }
 
         initEmailDetailFragment()
         initEmailListFragment(emailList)
@@ -26,19 +31,32 @@ class MainActivity : AppCompatActivity(), EmailListFragment.ListFragmentListener
     private fun initEmailDetailFragment() {
         emailDetailFragment = EmailDetailFragment.newInstance("abc", "dummy")
         supportFragmentManager.beginTransaction()
-            .add(R.id.emailDetailContainer, emailDetailFragment)
+            .replace(R.id.emailDetailContainer, emailDetailFragment)
             .commit()
     }
 
     private fun initEmailListFragment(emailList: ArrayList<EmailData>) {
-        val emailListFragment = EmailListFragment.newInstance(emailList, "dummy")
+        emailListFragment = EmailListFragment.newInstance(emailList)
         supportFragmentManager.beginTransaction()
-            .add(R.id.emailListContainer, emailListFragment)
+            .replace(R.id.emailListContainer, emailListFragment)
             .commit()
     }
 
     override fun onEmailListItemClicked(email: EmailData) {
         Log.i("xxy", "email in activity ") // todo temporary log
         emailDetailFragment.setEmailContent(email)
+    }
+
+    override fun onEmailMarkAsUnreadClicked(email: EmailData) {
+        emailListFragment.updateItem(email)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelableArrayList(SAVE_STATE_LIST, emailList)
+        super.onSaveInstanceState(outState)
+    }
+
+    companion object {
+        const val SAVE_STATE_LIST = "emailList"
     }
 }

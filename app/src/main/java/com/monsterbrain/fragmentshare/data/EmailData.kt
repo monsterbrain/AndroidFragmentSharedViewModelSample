@@ -2,8 +2,10 @@ package com.monsterbrain.fragmentshare.data
 
 import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
 data class EmailData(var fromAddress: String?, var subject: String?, var content: String?, var date: String?): Parcelable {
+    var hasRead = false
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),

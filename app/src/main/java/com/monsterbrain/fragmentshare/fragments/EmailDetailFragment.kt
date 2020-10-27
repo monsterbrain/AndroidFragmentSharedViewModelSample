@@ -1,5 +1,6 @@
 package com.monsterbrain.fragmentshare.fragments
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -24,6 +25,12 @@ class EmailDetailFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    private var listener: DetailFragmentListener? = null
+
+    interface DetailFragmentListener {
+        fun onEmailMarkAsUnreadClicked(email: EmailData)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -42,6 +49,18 @@ class EmailDetailFragment : Fragment() {
 
     fun setEmailContent(emailData: EmailData){
         contentTextview.text = emailData.content
+        buttonMarkAs.text = "Mark as Unread"
+        buttonMarkAs.setOnClickListener {
+            emailData.hasRead = false
+            listener?.onEmailMarkAsUnreadClicked(emailData)
+        }
+    }
+
+    override fun onAttach(context: Context) {
+        if (activity is DetailFragmentListener) {
+            listener = activity as DetailFragmentListener
+        }
+        super.onAttach(context)
     }
 
     companion object {
