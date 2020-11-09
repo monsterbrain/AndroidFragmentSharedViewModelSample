@@ -3,6 +3,8 @@ package com.monsterbrain.fragmentshare
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.monsterbrain.fragmentshare.data.DataGenerator
 import com.monsterbrain.fragmentshare.data.EmailData
 import com.monsterbrain.fragmentshare.fragments.EmailDetailFragment
@@ -58,5 +60,19 @@ class MainActivity : AppCompatActivity(), EmailListFragment.ListFragmentListener
 
     companion object {
         const val SAVE_STATE_LIST = "emailList"
+    }
+
+
+    class SharedViewModel : ViewModel() {
+        val selected = MutableLiveData<EmailData>()
+        val unreadClickedEmail = MutableLiveData<EmailData>()
+
+        fun select(item: EmailData) {
+            selected.value = item
+        }
+
+        fun markAsUnread(item: EmailData) {
+            unreadClickedEmail.value = item
+        }
     }
 }

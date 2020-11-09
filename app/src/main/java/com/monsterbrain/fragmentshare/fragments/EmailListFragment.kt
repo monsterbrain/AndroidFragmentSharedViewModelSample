@@ -7,7 +7,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.monsterbrain.fragmentshare.MainActivity
 import com.monsterbrain.fragmentshare.R
 import com.monsterbrain.fragmentshare.adapter.EmailListAdapter
 import com.monsterbrain.fragmentshare.data.EmailData
@@ -23,6 +26,9 @@ private const val ARG_PARAM_EMAIL_LIST = "param_email_list"
 class EmailListFragment : Fragment() {
     private var emailList: ArrayList<EmailData>? = null
     private var listener: ListFragmentListener? = null
+
+
+    private val model: MainActivity.SharedViewModel by activityViewModels()
 
     interface ListFragmentListener {
         fun onEmailListItemClicked(email: EmailData)
@@ -45,11 +51,18 @@ class EmailListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         emailList?.let { mailList -> setupList(mailList) }
+
+        model.unreadClickedEmail.observe(viewLifecycleOwner, Observer<EmailData> { item ->
+            // Update the UI
+            Log.i(EmailDetailFragment.TAG, "onViewCreated:  in model List back")
+            updateItem(item)
+        })
     }
 
     private fun setupList(emailList: ArrayList<EmailData>) {
         emailRecyclerView.adapter = EmailListAdapter(emailList) { emailData, position ->
-            listener?.onEmailListItemClicked(emailData)
+            model.select(emailData)
+            //listener?.onEmailListItemClicked(emailData)
             emailRecyclerView.adapter?.notifyItemChanged(position)
         }
         emailRecyclerView.layoutManager = LinearLayoutManager(context)

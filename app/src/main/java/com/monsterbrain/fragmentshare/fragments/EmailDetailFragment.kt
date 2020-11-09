@@ -2,10 +2,14 @@ package com.monsterbrain.fragmentshare.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+import com.monsterbrain.fragmentshare.MainActivity
 import com.monsterbrain.fragmentshare.R
 import com.monsterbrain.fragmentshare.data.EmailData
 import kotlinx.android.synthetic.main.fragment_email_detail.*
@@ -26,6 +30,10 @@ class EmailDetailFragment : Fragment() {
     private var param2: String? = null
 
     private var listener: DetailFragmentListener? = null
+
+    // Use the 'by activityViewModels()' Kotlin property delegate
+    // from the fragment-ktx artifact
+    private val model: MainActivity.SharedViewModel by activityViewModels()
 
     interface DetailFragmentListener {
         fun onEmailMarkAsUnreadClicked(email: EmailData)
@@ -52,7 +60,8 @@ class EmailDetailFragment : Fragment() {
         buttonMarkAs.text = "Mark as Unread"
         buttonMarkAs.setOnClickListener {
             emailData.hasRead = false
-            listener?.onEmailMarkAsUnreadClicked(emailData)
+            //listener?.onEmailMarkAsUnreadClicked(emailData)
+            model.markAsUnread(emailData)
         }
     }
 
@@ -61,6 +70,16 @@ class EmailDetailFragment : Fragment() {
             listener = activity as DetailFragmentListener
         }
         super.onAttach(context)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        model.selected.observe(viewLifecycleOwner, Observer<EmailData> { item ->
+            // Update the UI
+            Log.i(TAG, "onViewCreated:  in model observer")
+            setEmailContent(item)
+        })
     }
 
     companion object {
@@ -81,5 +100,7 @@ class EmailDetailFragment : Fragment() {
                     putString(ARG_PARAM2, param2)
                 }
             }
+
+        const val TAG = "EmailDetailFragment"
     }
 }
